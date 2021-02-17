@@ -4,7 +4,8 @@ import { FirebaseAnalyticsPlugin, FirebaseInitOptions } from "./definitions";
 
 declare var window: any;
 
-export class FirebaseAnalyticsWeb extends WebPlugin
+export class FirebaseAnalyticsWeb
+  extends WebPlugin
   implements FirebaseAnalyticsPlugin {
   private not_supported_mssg = "This method is not supported";
   private options_missing_mssg = "Firebase options are missing";
@@ -68,7 +69,7 @@ export class FirebaseAnalyticsWeb extends WebPlugin
    * @param options - userId: unique identifier of the user to log
    * Platform: Web/Android/iOS
    */
-  setUserId(options: { userId: string }): Promise<void> {
+  setUserId(options: { userId: string | null }): Promise<void> {
     return new Promise(async (resolve, reject) => {
       await this.ready;
 
@@ -79,7 +80,7 @@ export class FirebaseAnalyticsWeb extends WebPlugin
 
       const { userId } = options || { userId: undefined };
 
-      if (!userId) {
+      if (userId === undefined) {
         reject("userId property is missing");
         return;
       }
