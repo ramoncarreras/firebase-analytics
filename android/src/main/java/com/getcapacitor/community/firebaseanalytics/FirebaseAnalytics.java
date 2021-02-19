@@ -7,7 +7,9 @@ import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import java.util.ArrayList;
 import java.util.Iterator;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 @NativePlugin(
@@ -18,6 +20,7 @@ import org.json.JSONObject;
   }
 )
 public class FirebaseAnalytics extends Plugin {
+
   private com.google.firebase.analytics.FirebaseAnalytics mFirebaseAnalytics;
 
   private final String MISSING_REF_MSSG =
@@ -143,7 +146,6 @@ public class FirebaseAnalytics extends Plugin {
         .getActivity()
         .runOnUiThread(
           new Runnable() {
-
             @Override
             public void run() {
               mFirebaseAnalytics.setCurrentScreen(
@@ -217,6 +219,33 @@ public class FirebaseAnalytics extends Plugin {
             bundle.putDouble(key, (Double) value);
           } else if (value instanceof Long) {
             bundle.putLong(key, (Long) value);
+          } else if (value instanceof JSONArray) {
+            JSONArray items = (JSONArray) value;
+            ArrayList itemBundleList = new ArrayList();
+
+            for (int i = 0; i < items.length(); i++) {
+              Bundle itemBundle = new Bundle();
+              JSONObject itemParams = items.getJSONObject(i);
+              Iterator<String> itemKeys = itemParams.keys();
+
+              while (itemKeys.hasNext()) {
+                String itemKey = itemKeys.next();
+                Object itemValue = itemParams.get(itemKey);
+                if (itemValue instanceof String) {
+                  itemBundle.putString(itemKey, (String) itemValue);
+                } else if (itemValue instanceof Integer) {
+                  itemBundle.putInt(itemKey, (Integer) itemValue);
+                } else if (itemValue instanceof Double) {
+                  itemBundle.putDouble(itemKey, (Double) itemValue);
+                } else if (itemValue instanceof Long) {
+                  itemBundle.putLong(itemKey, (Long) itemValue);
+                }
+              }
+
+              itemBundleList.add(itemBundle);
+            }
+
+            bundle.putParcelableArrayList(key, itemBundleList);
           } else {
             call.reject("value for " + key + " is missing");
           }
